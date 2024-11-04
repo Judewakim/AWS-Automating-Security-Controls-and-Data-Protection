@@ -1,0 +1,48 @@
+
+Steps
+1. configure CloudTrail trail and capture the trail events in CloudWatch logs
+-setup CloudTrail trail
+-modify the trail to enable the delivery of CloudTrail events to CloudWatch logs
+
+2. create KMS encrypted RDS DB and an EC2 EBS volume
+-create DB
+-whatever configurations you want
+-make sure encryption is checked
+-launch instance
+-whatever configurations you want
+-expand the storage section and make sure the EBS volume is encrypted
+
+3. create CloudWatch logs metric filter and CloudWatch alarm for unencrypted RDS DB
+-update the CloudWatch log group to create a metric filter
+-use "{ ($.eventSource = "rds.amazonaws.com") && ($.eventName = "CreateDBInstance") && ($.responseElements.storageEncrypted IS FALSE)}" as pattern
+-create an alarm
+-use the namespace you just created
+-The metric parameter should be "sum, 5min, static, greater/equal to, than 1"
+-create a new topic and enter your email
+-check your email for confirmation of the topic
+
+4. create CloudWatch logs metric filter and CloudWatch alarm for unencrypted EC2 EBS volume
+-update the CloudWatch log group to create a metric filter
+-use "{ ($.eventSource = "ec2.amazonaws.com") && ($.eventName = "RunInstances") && ( ($.requestParameters.blockDeviceMapping.items[*].ebs.encrypted NOT EXISTS) || ($.requestParameters.blockDeviceMapping.items[*].ebs.encrypted IS FALSE) )}" as pattern
+-create an alarm
+-use the namespace you just created
+-The metric parameter should be "sum, 5min, static, greater/equal to, than 1"
+-use the topic you created before
+
+5. create an unencrypted RDS DB and check email for alarm
+-create DB
+-whatever configurations you want
+-make sure encryption is unchecked
+-once created, check email
+
+6. create an unencrypted EC2 EBS volume and check email for alarm
+-launch instance
+-whatever configurations you want
+-expand storage section and make sure EBS volume is unencrypted
+-once initialized, check email
+
+7. clean up
+-delete alarms
+-delete log group
+-terminate EC2 instances
+-delete RDS DBs
