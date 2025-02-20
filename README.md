@@ -1,14 +1,94 @@
 # AWS Automating Security Controls and Data Protection
-Improve Application Security Posture by Automating Security Controls and Data Protection <br>
-*This lab is from Udemy via Level Up*
 
-## Lab scenario <br> 
-"In this AWS lab, you are a Solutions Architect working at DataTech Innovations, a data analytics company. Thecompany wants to improve its application security posture and implement data protection measures that leverage Amazon RDS, CloudTrail, Amazon CloudWatch and AWS EC2 services. DataTech Innovations is building a state-of-the-art technology product named "DataGuardian" that uses advanced data analytics to provide robust security solutions for its customers. To achieve the company’s security objectives, you are tasked to architect a solution that automates security controls by monitoring the data encryption configurations on Amazon RDS and Amazon EC2 EBS volumes. The solution must ensure that all data on Amazon RDS databases and Amazon EBS volumes always stays encrypted. Any deviations from these security controls must result in notifications being sent out by leveraging AWS CloudTrail, Amazon CloudWatch, and Amazon SNS service."
+> **Enhancing Application Security Posture with Automated Security Controls and Data Protection**
 
-## Objectives <br>
--Configure an AWS CloudTrail trail and capture the trail events in Amazon CloudWatch Logs<br>
--Create KMS encrypted Amazon RDS database as well as Amazon EC2 EBS volume<br>
--Create CloudWatch Logs metric filter and CloudWatch alarm for unencrypted Amazon RDS database<br>
--Create an unencrypted Amazon RDS database and check Amazon SNS notifications<br>
--Create CloudWatch Logs metric filter and CloudWatch alarm for unencrypted Amazon EC2 EBS volume<br>
--Create unencrypted Amazon EC2 EBS volume and check Amazon SNS notifications<br>
+## 📝 Lab Scenario
+
+You are a **Solutions Architect** at **DataTech Innovations**, a data analytics company. The organization aims to strengthen its security posture and implement **automated security controls** using:
+
+- **Amazon RDS**
+- **AWS CloudTrail**
+- **Amazon CloudWatch**
+- **AWS EC2**
+
+### 🌟 Project: **DataGuardian**
+DataTech Innovations is developing a cutting-edge security analytics tool, "**DataGuardian**." Your task is to **architect a solution** that ensures compliance by monitoring and automatically remediating security configurations.
+
+---
+
+## 🎯 Objectives
+
+✔ **Automate Security Controls** – Monitor & remediate security configurations in real-time.<br>
+✔ **Ensure Data Protection** – Enforce encryption for RDS and EC2 instances.<br>
+✔ **Enable Monitoring & Logging** – Utilize CloudTrail & CloudWatch for security insights. <br>
+
+---
+
+## 📌 Architecture Overview
+
+🔹 **AWS Config** continuously checks RDS & EC2 encryption status.<br>
+🔹 **AWS Lambda** triggers remediation when a non-compliant resource is detected.<br>
+🔹 **AWS CloudTrail & CloudWatch** track all API calls & provide monitoring dashboards.
+
+---
+
+## ⚡ Prerequisites
+
+Before deploying this solution, ensure you have:
+
+- ✅ An **AWS account** with permissions to manage RDS, EC2, Lambda, Config, CloudTrail, and CloudWatch.
+- ✅ **AWS CLI** installed & configured.
+- ✅ **Terraform** installed for infrastructure as code deployment.
+
+---
+
+## 🚀 Deployment Instructions
+
+### 1️⃣ **Clone the Repository**
+```bash
+ git clone https://github.com/Judewakim/AWS-Automating-Security-Controls-and-Data-Protection.git
+ cd AWS-Automating-Security-Controls-and-Data-Protection
+```
+
+### 2️⃣ **Review and Modify Configuration**
+- Open `script.tf` and modify any parameters as needed.
+
+### 3️⃣ **Deploy the Infrastructure**
+```bash
+terraform init
+terraform apply
+```
+Confirm the deployment when prompted.
+
+### 4️⃣ **Verify Deployment**
+- Check **AWS Console** to ensure AWS Config rules, Lambda functions, and IAM roles are created.
+- Review **AWS CloudTrail & CloudWatch** logs for activity tracking.
+
+---
+
+## 🗑 Cleanup
+
+To remove all deployed resources, run:
+```bash
+./deletion.sh
+```
+
+Or, use Terraform:
+```bash
+terraform destroy
+```
+
+---
+
+## 📚 References
+
+📌 [Automated Security Response on AWS](https://aws.amazon.com/solutions/implementations/automated-security-response-on-aws/)<br>
+📌 [Implementing Security Controls on AWS](https://docs.aws.amazon.com/prescriptive-guidance/latest/aws-security-controls/introduction.html)<br>
+📌 [Automate Data Protection](https://docs.aws.amazon.com/wellarchitected/latest/security-pillar/sec_protect_data_rest_automate_protection.html)
+
+---
+
+> **Note:** This lab is based on content from *Udemy via Level Up.*
+
+💡 **Happy Securing! 🔒**
+
