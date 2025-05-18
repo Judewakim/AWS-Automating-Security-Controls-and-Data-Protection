@@ -52,6 +52,45 @@ resource "aws_iam_policy_attachment" "cloudtrail_logs" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSCloudTrailRole"
 }
 
+resource "aws_iam_role" "lambda_remediation_role" {
+  name = "lambda_remediation_role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Action = "sts:AssumeRole",
+      Principal = {
+        Service = "lambda.amazonaws.com"
+      },
+      Effect = "Allow",
+      Sid    = ""
+    }]
+  })
+}
+
+resource "aws_iam_policy_attachment" "lambda_remediation_policy" {
+  name       = "lambda_remediation_policy"
+  roles      = [aws_iam_role.lambda_remediation_role.name]
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
+}
+
+resource "aws_iam_policy_attachment" "lambda_rds_policy" {
+  name       = "lambda_rds_policy"
+  roles      = [aws_iam_role.lambda_remediation_role.name]
+  policy_arn = "arn:aws:iam::aws:policy/AmazonRDSFullAccess"
+}
+
+resource "aws_lambda_function" "remediate_unencrypted_resources" {
+  filename         = "remediate_unencrypted_resources.zip"
+  function_name    = "RemediateUnencryptedResources"
+  role             = aws_iam_role.lambda_remediation_role.arn
+  handler          = "lambda_function.lambda_handler"
+  runtime          = "python3.9"
+  source_code_hash = filebase64sha256("remediate_unencrypted_resources.zip")
+}
+
+
+
 resource "aws_sns_topic" "alerts" {
   name = "DataGuardianAlerts"
 }
@@ -59,7 +98,7 @@ resource "aws_sns_topic" "alerts" {
 resource "aws_sns_topic_subscription" "email_subscription" {
   topic_arn = aws_sns_topic.alerts.arn
   protocol  = "email"
-  endpoint  = "your-email@example.com"  # Replace with your email address
+  endpoint  = "wjude852@gmail.com" 
 }
 
 resource "aws_cloudwatch_metric_alarm" "unencrypted_rds_alarm" {
@@ -120,3 +159,4 @@ resource "aws_cloudwatch_log_metric_filter" "unencrypted_ebs_filter" {
     value     = "1"
   }
 }
+
