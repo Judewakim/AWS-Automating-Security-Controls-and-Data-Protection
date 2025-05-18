@@ -6,20 +6,19 @@ import os
 region = os.environ["AWS_REGION"]
 kms_key_id = os.environ.get("RDS_KMS_KEY", "alias/aws/rds")
 
-
 ec2 = boto3.client('ec2', region_name=region)
 rds = boto3.client('rds', region_name=region)
 
 MINIMUM_EXECUTION_BUFFER_MS = 5000
 
 
-def lambda_handler(event, context):    
-    start_time = time.time()
+def lambda_handler(event, context):
+    # start_time = time.time()
     
     print("Starting EBS volume remediation...")
     remediate_all_unencrypted_ebs_volumes(context)
 
-    print("Starting RDS instance remediation...")
+    print("\n\nStarting RDS instance remediation...")
     remediate_all_unencrypted_rds_instances(context)
 
     return {
@@ -29,12 +28,28 @@ def lambda_handler(event, context):
 
 def remediate_all_unencrypted_ebs_volumes(context):
     try:
-        volumes = ec2.describe_volumes(Filters=[{'Name': 'encrypted', 'Values': ['false']}])
+        # Collect all volumes ONCE
+        all_volumes = []
+        next_token = None
+        while True:
+            if next_token:
+                response = ec2.describe_volumes(NextToken=next_token)
+            else:
+                response = ec2.describe_volumes()
+            all_volumes.extend(response['Volumes'])
+            next_token = response.get('NextToken')
+            if not next_token:
+                break
+
+        # Filter unencrypted volumes
+        unencrypted_volumes = [v for v in all_volumes if not v['Encrypted']]
+        print(f"Found {len(unencrypted_volumes)} unencrypted EBS volumes to remediate.")
+
     except Exception as e:
-        print(f"Failed to describe EBS volumes: {str(e)}")
+        print(f"Failed to list EBS volumes: {str(e)}")
         return
 
-    for volume in volumes['Volumes']:
+    for volume in unencrypted_volumes:
         if context.get_remaining_time_in_millis() < MINIMUM_EXECUTION_BUFFER_MS:
             print("Stopping EBS loop early to avoid timeout.")
             return
@@ -45,6 +60,7 @@ def remediate_all_unencrypted_ebs_volumes(context):
             remediate_ebs_volume(volume, context)
         except Exception as e:
             print(f"Error remediating volume {volume_id}: {str(e)}")
+
 
 def remediate_all_unencrypted_rds_instances(context):
     try:
@@ -74,7 +90,7 @@ def remediate_ebs_volume(volume, context):
     if context.get_remaining_time_in_millis() < MINIMUM_EXECUTION_BUFFER_MS:
         print("Aborting remediation to avoid timeout.")
         return
-    
+
     print(f"Creating snapshot of volume {volume_id}...")
     snapshot = ec2.create_snapshot(VolumeId=volume_id, Description=f"Snapshot of {volume_id} for encryption")
     snapshot_id = snapshot['SnapshotId']
@@ -101,6 +117,7 @@ def remediate_ebs_volume(volume, context):
     new_volume = ec2.create_volume(
         SnapshotId=encrypted_snapshot_id,
         AvailabilityZone=availability_zone,
+        Encrypted=True,
         VolumeType=volume['VolumeType'],
         TagSpecifications=[{
             'ResourceType': 'volume',
@@ -110,9 +127,7 @@ def remediate_ebs_volume(volume, context):
     new_volume_id = new_volume['VolumeId']
     print(f"Encrypted volume {new_volume_id} created from snapshot {encrypted_snapshot_id}.")
 
-    # Optional: attach logic (careful — must stop instance)
     print(f"[Info] Volume {volume_id} is now encrypted as {new_volume_id}. You may attach it then delete the unencrypted version manually or wait for automated cutover.")
-
 
 # Logic for RDS encryption
 def remediate_rds_instance(instance, context):
