@@ -10,6 +10,7 @@ You are a **Solutions Architect** at **DataTech Innovations**, a data analytics 
 - **AWS CloudTrail**
 - **Amazon CloudWatch**
 - **AWS EC2**
+- **Terraform (IaC)**
 
 ### 🌟 Project: **DataGuardian**
 DataTech Innovations is developing a cutting-edge security analytics tool, that ensures compliance. The task is to develop a solution to monitor and automatically remediate security configurations on unencrypted EC2 EBS volumes and RDS instances by automatically identifying unencrypted instances and volumes, creating encrypted versions, then automatically swapping them after-hours. 
