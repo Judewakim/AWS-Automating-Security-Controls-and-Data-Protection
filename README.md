@@ -12,7 +12,7 @@ You are a **Solutions Architect** at **DataTech Innovations**, a data analytics 
 - **AWS EC2**
 
 ### 🌟 Project: **DataGuardian**
-DataTech Innovations is developing a cutting-edge security analytics tool, "**DataGuardian**." Your task is to **architect a solution** that ensures compliance by monitoring and automatically remediating security configurations.
+DataTech Innovations is developing a cutting-edge security analytics tool, that ensures compliance. The task is to develop a solution to monitor and automatically remediate security configurations on unencrypted EC2 EBS volumes and RDS instances by automatically identifying unencrypted instances and volumes, creating encrypted versions, then automatically swapping them after-hours. 
 
 ---
 
